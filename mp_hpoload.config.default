@@ -1,0 +1,101 @@
+#format: sh
+#
+#  mp_hpoload.config
+#
+#  This file sets up environment variables that are needed for a specific
+#  data provider input file to be handled by the annotation loader.
+#
+###########################################################################
+
+###########################################################################
+#
+#  GENERAL SETTINGS
+#
+###########################################################################
+
+#
+#  If the MGICONFIG environment variable does not have a local override,
+#  use the default "live" settings.
+#
+if [ "${MGICONFIG}" = "" ]
+then
+    MGICONFIG=/usr/local/mgi/live/mgiconfig
+    export MGICONFIG
+fi
+
+. ${MGICONFIG}/master.config.sh
+
+#  Annotation Loader shell script
+ANNOTLOADER=${ANNOTLOAD}/annotload.csh
+
+export ANNOTLOADER
+
+###########################################################################
+#
+#  LOAD SPECIFIC SETTINGS
+#
+###########################################################################
+
+#  Path name of the archive, logs, reports and output directories
+FILEDIR=${DATALOADSOUTPUT}/mp_hpo
+ARCHIVEDIR=${FILEDIR}/archive
+LOGDIR=${FILEDIR}/logs
+RPTDIR=${FILEDIR}/reports
+OUTPUTDIR=${FILEDIR}/output
+
+export FILEDIR ARCHIVEDIR LOGDIR RPTDIR OUTPUTDIR
+
+# directory where input files are created by goahuman.py
+INPUTDIR=${FILEDIR}/input
+INPUT_FILE_DEFAULT=${INPUTDIR}/mp_hpo.txt
+INPUT_FILE_TOLOAD=${INPUTDIR}/mp_hpo_toload.txt
+QC_RPT=${RPTDIR}/mp_hpo_qc.rpt
+QC_LOGFILE=${LOGDIR}/mp_hpo_qc.log
+
+export INPUTDIR INFILE_NAME INPUT_FILE_TOLOAD QC_RPT QC_LOGFILE
+
+#  Complete path name of the log files
+LOG_FILE=${LOGDIR}/mp_hpoload.log
+LOG_PROC=${LOGDIR}/mp_hpoload.proc.log
+LOG_DIAG=${LOGDIR}/mp_hpoload.diag.log
+LOG_CUR=${LOGDIR}/mp_hpoload.cur.log
+LOG_VAL=${LOGDIR}/mp_hpoload.val.log
+
+export LOG_FILE LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG
+
+# load reference
+JNUM=J:229231
+
+# editor creating these annotations
+EDITOR=mgd_dbo
+
+LOAD_QC=${MPHPOLOAD}/bin/mpHpoQC.py
+
+export JNUM EDITOR LOAD_QC
+
+#  Send debug messages to the diagnostic log (true or false)
+LOG_DEBUG=false
+
+export JNUM EDITOR LOG_DEBUG
+
+#  The name of the job stream for the load
+JOBSTREAM=mp_hpoload
+
+export JOBSTREAM
+
+###########################################################################
+#
+#  MISCELLANEOUS SETTINGS
+#
+###########################################################################
+
+#  The name of the load for the subject of an email notification
+MAIL_LOADNAME="mp/HPO annotation load"
+
+#  Recipient list for mailing the log files (comma-separated)
+MAIL_LOG_PROC="sc"
+
+export MAIL_LOADNAME MAIL_LOG_PROC
+
+INSTALLDIR=${MPHPOLOAD}
+export INSTALLDIR

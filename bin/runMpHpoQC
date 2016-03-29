@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+#  runMpHpoQC
+###########################################################################
+#
+# A copy of this script is intended to reside in /usr/local/bin on all
+# servers to make it available in the common PATH.
+#
+# Its allows someone to run the MP/HPO QC reports without having
+# to provide the full path to where the wrapper script is installed.
+#
+###########################################################################
+
+usage ()
+{
+    echo "Usage: runMpHpoQC input_file"
+    echo "       where"
+    echo "           input_file = path to the MP/HPO input file"
+    exit 1
+}
+
+LOADDIR=/usr/local/mgi/live/dataload/mp_hpoload
+
+WRAPPER=${LOADDIR}/bin/mpHpoQC.sh
+
+#
+# The mp_hpoload product is not installed on all servers, so make sure
+# it exists on this one.
+#
+if [ ! -d ${LOADDIR} ]
+then
+    echo "The mp_hpoload software does not exist on this server"; exit 1
+fi
+
+#
+# Make sure an input file was passed as an argument to the script.
+#
+if [ $# -eq 1 ]
+then
+    if [ ! -r $1 ]
+    then
+        echo "Input file does not exist: $1"; exit 1
+    fi
+else
+    usage
+fi
+
+#
+# Invoke the QC report wrapper script with the arguments that
+# were passed to this script.
+#
+${WRAPPER} $*
