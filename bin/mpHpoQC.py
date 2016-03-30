@@ -312,7 +312,7 @@ def runQcChecks ():
     #
 
     if lineNum < minLines:
-	fpQcRpt.write('\nFatal Error: input file has < %s lines. Total lines: %s\n' % (minLines, lineNum))
+	fpQcRpt.write('\nInput file has < %s lines indicating an incomplete file. Total input lines: %s.\n No other QC checking will be done until this is fixed.\n' % (minLines, lineNum))
 	closeFiles()
 	sys.exit(3)
     if hasFatalErrors:
