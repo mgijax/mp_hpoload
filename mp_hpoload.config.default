@@ -64,7 +64,7 @@ LOG_VAL=${LOGDIR}/mp_hpoload.val.log
 export LOG_FILE LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG
 
 # load reference
-JNUM=J:229231
+JNUM=J:229957
 
 # minumum number of lines expected in the input file
 MIN_LINES=70
