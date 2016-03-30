@@ -66,12 +66,15 @@ export LOG_FILE LOG_PROC LOG_DIAG LOG_CUR LOG_VAL LOG_DEBUG
 # load reference
 JNUM=J:229231
 
+# minumum number of lines expected in the input file
+MIN_LINES=70
+
 # editor creating these annotations
 EDITOR=mgd_dbo
 
 LOAD_QC=${MPHPOLOAD}/bin/mpHpoQC.py
 
-export JNUM EDITOR LOAD_QC
+export JNUM MIN_LINES EDITOR LOAD_QC
 
 #  Send debug messages to the diagnostic log (true or false)
 LOG_DEBUG=false

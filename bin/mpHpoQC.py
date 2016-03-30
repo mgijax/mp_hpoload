@@ -82,6 +82,9 @@ qcRptFile = os.environ['QC_RPT']
 # file with records to load 
 inputFileToLoad = os.environ['INPUT_FILE_TOLOAD']
 
+# minimum number of lines expected in the input file
+minLines = int(os.environ['MIN_LINES'])
+
 # {mpID:key, ...}
 mpHeaderLookup = {}
 
@@ -91,14 +94,23 @@ hpoLookup = {}
 # input lines with missing data
 missingDataList = []
 
-# input lines with < 3 columns
+# input lines with < 4 columns
 missingColumnsList = []
+
+# input lines with no MP ID
+missingMpIdList = []
 
 # input MP header IDs not in the database
 invalidMpHeaderList = []
 
+# input MP header term does not match term in the database
+invalidMpTermList = []
+
 # input HPO IDs not in the database
 invalidHpoList = []
+
+# input HPO term does not match term in the database
+invalidHpoTermList = []
 
 # all passing QC (non-fatal, non-skip)
 linesToLoadList = []
@@ -145,22 +157,24 @@ def init ():
    
     # load lookups 
     # lookup of MP header terms
-    results = db.sql('''select a.accid, t._Term_key, t.term
+    results = db.sql('''select a.accid, t.term
 	from DAG_Node n, VOC_Term t, ACC_Accession a
 	where n._Label_key = 3
 	and n._Object_key = t._Term_key
 	and t._Vocab_key = 5
+	and t.isObsolete = 0
 	and t._Term_key = a._Object_key
 	and a._MGIType_key = 13
-	and a._LogicalDB_key = 34''', 'auto')
+	and a._LogicalDB_key = 34
+	and a.preferred = 1''', 'auto')
  
     for r in results:
-        mpId = r['accid']
-	termKey = r['_Term_key']
-	mpHeaderLookup[mpId] = termKey
+        mpId = string.lower(r['accid'])
+	term = string.lower(r['term'])
+	mpHeaderLookup[mpId] = term
 
     # load lookup of HPO terms
-    results = db.sql('''select a.accid, t._Term_key, t.term 
+    results = db.sql('''select a.accid, t.term 
 	from VOC_Term t, ACC_Accession a
 	where t._Vocab_key = 106
 	and t._Term_key = a._Object_key
@@ -168,9 +182,9 @@ def init ():
         and a._LogicalDB_key = 180''', 'auto')
 
     for r in results:
-	hpoId = r['accid']
-        termKey = r['_Term_key']
-	hpoLookup[hpoId] = termKey
+	hpoId = string.lower(r['accid'])
+        term = string.lower(r['term'])
+	hpoLookup[hpoId] = term
 
     return
 
@@ -228,37 +242,64 @@ def runQcChecks ():
     for line in fpInfile.readlines():
 	lineNum += 1
 	line = string.strip(line)
+	# can't do this or won't detect missing data in first column
         #tokens = map(string.strip, string.split(line, TAB))
 	tokens = string.split(line, TAB)
+	#print '\n'
 	#print 'lineNum: %s tokens: %s' % (lineNum, tokens)
 	# skip blank lines
 	if  len(tokens) == 1 and tokens[0] == '':
 	    skipCt += 1
 	    continue
-	if len(tokens) < 4 :
-	    hasFatalErrors = 1
-	    missingColumnsList.append('%s: %s%s' % (lineNum, line, CRT))
-	    continue
+	if len(tokens) < 4:
+	    # if the first token is an MP ID, then we are missing columns
+	    if string.find(tokens[0], 'MP:') >= 0: 
+		#print 'missing columns line: %s' % lineNum
+		hasFatalErrors = 1
+		missingColumnsList.append('Line %s: %s%s' % (lineNum, line, CRT))
+		continue
+	    # otherwise we just have a missing MP ID, which is OK, just skip
+	    else:
+		#print 'missing MP ID: %s' % lineNum
+		hasQcErrors = 1
+		missingMpIdList.append('Line %s: %s%s' % (lineNum, line, CRT))
+                continue
 
 	mpId = string.strip(tokens[0])
-	#mpTerm = tokens[1]
+	mpTerm = string.strip(tokens[1])
 	hpoId = string.strip(tokens[2])
-	#hpoTerm = tokens[3]
-	if mpId == '' or hpoId == '':
-	    missingDataList.append('%s: %s%s' % (lineNum, line, CRT))
+	hpoTerm = string.strip(tokens[3])
+	#print string.lower(mpId)
+	#print string.lower(mpTerm)
+	#print string.lower(hpoId)
+	#print string.lower(hpoTerm)
+	if mpId == '' or mpTerm == '' or hpoId == '' or hpoTerm == '':
+	    missingDataList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
+	    #print 'hasFatalErrors missing data'
 	    hasFatalErrors = 1
 	    continue
 	hasIdErrors = 0
-	if not mpHeaderLookup.has_key(mpId):
-	    invalidMpHeaderList.append('%s: %s%s' % (lineNum, line, CRT))
-	    hasQcErrors = 1
+	if not mpHeaderLookup.has_key(string.lower(mpId)):
+	    invalidMpHeaderList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
 	    hasIdErrors = 1
-	if not hpoLookup.has_key(hpoId):
-	    invalidHpoList.append('%s: %s%s' % (lineNum, line, CRT))
-	    hasQcErrors = 1
+	else:
+	    if not mpHeaderLookup[string.lower(mpId)] == string.lower(mpTerm):
+		invalidMpTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, line, mpHeaderLookup[string.lower(mpId)], CRT))
+		hasIdErrors = 1
+	if not hpoLookup.has_key(string.lower(hpoId)):
+	    invalidHpoList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
             hasIdErrors = 1
+	else:
+	    #print hpoLookup[string.lower(hpoId)]
+	    #print 'should match:'
+	    #print string.lower(hpoTerm)
+	    if not hpoLookup[string.lower(hpoId)] == string.lower(hpoTerm):
+		invalidHpoTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, line, hpoLookup[string.lower(hpoId)], CRT))
+		hasIdErrors = 1
+
 	if hasIdErrors:
-	    hasQcErrors = 1
+	    #print 'print hasFatalErrors hasIdErrors'
+	    hasFatalErrors = 1
 	    skipCt += 1
 	    continue
 	# If we get here, we have a good record, write it out to the load file
@@ -270,47 +311,72 @@ def runQcChecks ():
     # will not run
     #
 
+    if lineNum < minLines:
+	fpQcRpt.write('\nFatal Error: input file has < %s lines. Total lines: %s\n' % (minLines, lineNum))
+	closeFiles()
+	sys.exit(3)
     if hasFatalErrors:
-	fpQcRpt.write('\nThese errors must be fixed before publishing; if present, the load will not run\n\n')
+	fpQcRpt.write('\nThe following errors must be fixed before publishing; if present, the load will not run\n\n')
+	    
+	if len(missingColumnsList):
+	    fpQcRpt.write('\nInput lines with missing columns:\n')
+	    fpQcRpt.write('-----------------------------\n')
+	    for line in missingColumnsList:
+		fpQcRpt.write(line)
+	    fpQcRpt.write('\n')
 
-        if len(missingColumnsList):
-            fpQcRpt.write('\nInput lines with < 4 columns:\n')
-            fpQcRpt.write('-----------------------------\n')
-            for line in missingColumnsList:
-                fpQcRpt.write(line)
-            fpQcRpt.write('\n')
+	if len(missingDataList):
+	    fpQcRpt.write('\nInput lines with missing data:\n')
+	    fpQcRpt.write('-----------------------------\n')
+	    for line in missingDataList:
+		fpQcRpt.write(line)
+	    fpQcRpt.write('\n')
 
-        if len(missingDataList):
-            fpQcRpt.write('\nInput lines with missing data:\n')
-            fpQcRpt.write('-----------------------------\n')
-            for line in missingDataList:
-                fpQcRpt.write(line)
-            fpQcRpt.write('\n')
-	
-	#closeFiles()
-	#sys.exit(3)
-    #
-    # Report any non-fatal errors
-    #
-
-    if hasQcErrors:
-	fpQcRpt.write('\nThese errors are non-fatal. These records will be skipped.\n\n')
-	if len(invalidMpHeaderList):
-	    fpQcRpt.write('\nInput ines with invalid MP Header terms:\n')
+        if len(invalidMpHeaderList):
+            fpQcRpt.write('\nInput lines with invalid MP header IDs:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in invalidMpHeaderList:
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
-	if len(invalidMpHeaderList):
-            fpQcRpt.write('\nInput ines with invalid HPO terms:\n')
+
+	if len(invalidMpTermList):
+	    fpQcRpt.write('\nInput lines where MP term does not match term in the database:\n')
+            fpQcRpt.write('-----------------------------\n')
+            for line in invalidMpTermList:
+                fpQcRpt.write(line)
+            fpQcRpt.write('\n')
+
+        if len(invalidHpoList):
+            fpQcRpt.write('\nInput lines with invalid HPO IDs:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in invalidHpoList:
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
 
-	print '%sNumber with non-fatal QC errors, these will not be processed: %s' % (CRT, skipCt)
-	
-	print 'Number with no QC errors, these will be loaded: %s%s' % ( loadCt, CRT)
+	if len(invalidHpoTermList):
+            fpQcRpt.write('\nInput lines where HPO term does not match term in the database:\n')
+            fpQcRpt.write('-----------------------------\n')
+            for line in invalidHpoTermList:
+                fpQcRpt.write(line)
+            fpQcRpt.write('\n')
+
+	closeFiles()
+        sys.exit(3)
+    #
+    # Report any non-fatal errors
+    #
+    if hasQcErrors:
+	fpQcRpt.write('\nThe following errors are non-fatal. These records will be skipped.\n\n')
+	if len(missingMpIdList):
+	    fpQcRpt.write('\nInput lines with missing MP header terms:\n')
+            fpQcRpt.write('-----------------------------\n')
+            for line in missingMpIdList:
+                fpQcRpt.write(line)
+            fpQcRpt.write('\n')
+
+    print '%sNumber with non-fatal QC errors, these will not be processed: %s' % (CRT, skipCt)
+    
+    print 'Number with no QC errors, these will be loaded: %s%s' % ( loadCt, CRT)
 	#closeFiles()
 	#sys.exit(2)
 
@@ -337,18 +403,15 @@ def closeFiles ():
 #
 # Main
 #
-print 'checkArgs'
+#print 'checkArgs'
 checkArgs()
-print 'init'
+#print 'init'
 init()
-print 'runQcChecks'
+#print 'runQcChecks'
 runQcChecks()
-print 'closeFiles'
+#print 'closeFiles'
 closeFiles()
-if hasFatalErrors:
-    sys.exit(3)
 if hasQcErrors: 
     sys.exit(2)
 else:
     sys.exit(0)
-
