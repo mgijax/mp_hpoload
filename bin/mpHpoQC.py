@@ -376,7 +376,7 @@ def runQcChecks ():
 
     print '%sNumber with non-fatal QC errors, these will not be processed: %s' % (CRT, skipCt)
     
-    print 'Number with no QC errors, these will be loaded: %s%s' % ( loadCt, CRT)
+    print 'Total number that will be loaded: %s%s' % ( loadCt, CRT)
 	#closeFiles()
 	#sys.exit(2)
 
