@@ -1,5 +1,11 @@
+TAG: omim_hpoload-6-0-5-2
+DATE: 03/31/2016
+STAFF: sc
+CHANGES: US3 - Load HPO/OMIM relationships
+1) mp_hpoload.py, mp_hpoload.sh - new. 
+
 TAG: omim_hpoload-6-0-5-1
 DATE: 03/30/2016
 STAFF: sc
-CHANGES: TR12267 Project HIPPO
+CHANGES: TR12267 Project HIPPO US2
 1) new product with basics and QC/publish scripts 
