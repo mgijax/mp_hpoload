@@ -42,17 +42,19 @@ ARCHIVEDIR=${FILEDIR}/archive
 LOGDIR=${FILEDIR}/logs
 RPTDIR=${FILEDIR}/reports
 OUTPUTDIR=${FILEDIR}/output
-
-export FILEDIR ARCHIVEDIR LOGDIR RPTDIR OUTPUTDIR
-
-# directory where input files are created by goahuman.py
 INPUTDIR=${FILEDIR}/input
+
+export FILEDIR ARCHIVEDIR LOGDIR RPTDIR OUTPUTDIR INPUTDIR
+
+# input/output
 INPUT_FILE_DEFAULT=${INPUTDIR}/mp_hpo.txt
 INPUT_FILE_TOLOAD=${INPUTDIR}/mp_hpo_toload.txt
 QC_RPT=${RPTDIR}/mp_hpo_qc.rpt
+RELATIONSHIP_BCP=MGI_Relationship.bcp
 QC_LOGFILE=${LOGDIR}/mp_hpo_qc.log
 
-export INPUTDIR INFILE_NAME INPUT_FILE_TOLOAD QC_RPT QC_LOGFILE
+export INPUT_FILE_DEFAULT INPUT_FILE_TOLOAD QC_RPT RELATIONSHIP_BCP
+export QC_LOGFILE
 
 #  Complete path name of the log files
 LOG_FILE=${LOGDIR}/mp_hpoload.log
