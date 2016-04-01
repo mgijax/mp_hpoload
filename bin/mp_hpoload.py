@@ -93,7 +93,7 @@ fpInFile = ''
 fpRelationshipFile = ''
 
 # The mp_hpo relationship category key 'mp_to_hpo'
-catKey = 5
+catKey = 1005
 
 # the mp_hpo relationship term key 'mp_to_hpo'
 relKey = 17396910
