@@ -241,10 +241,10 @@ def runQcChecks ():
     header = fpInfile.readline()
     for line in fpInfile.readlines():
 	lineNum += 1
-	line = string.strip(line)
-	# can't do this or won't detect missing data in first column
-        #tokens = map(string.strip, string.split(line, TAB))
+	line = line[:-1]
 	tokens = string.split(line, TAB)
+	#print 'count tokens: %s' % len(tokens)
+	#print tokens
 	#print '\n'
 	#print 'lineNum: %s tokens: %s' % (lineNum, tokens)
 	# skip blank lines
@@ -253,17 +253,16 @@ def runQcChecks ():
 	    continue
 	if len(tokens) < 4:
 	    # if the first token is an MP ID, then we are missing columns
-	    if string.find(tokens[0], 'MP:') >= 0: 
-		#print 'missing columns line: %s' % lineNum
-		hasFatalErrors = 1
-		missingColumnsList.append('Line %s: %s%s' % (lineNum, line, CRT))
-		continue
-	    # otherwise we just have a missing MP ID, which is OK, just skip
-	    else:
-		#print 'missing MP ID: %s' % lineNum
-		hasQcErrors = 1
-		missingMpIdList.append('Line %s: %s%s' % (lineNum, line, CRT))
-                continue
+	    #if string.find(tokens[0], 'MP:') >= 0: 
+	    #print 'missing columns line: %s' % lineNum
+	    hasFatalErrors = 1
+	    missingColumnsList.append('Line %s: %s%s' % (lineNum, line, CRT))
+	    continue
+	if tokens[0] == '':
+	    #print 'missing MP ID: %s' % lineNum
+	    hasQcErrors = 1
+	    missingMpIdList.append('Line %s: %s%s' % (lineNum, line, CRT))
+	    continue
 
 	mpId = string.strip(tokens[0])
 	mpTerm = string.strip(tokens[1])
