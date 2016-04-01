@@ -1,3 +1,9 @@
+TAG: omim_hpoload-6-0-5-3
+DATE: ????
+STAFF: sc
+CHANGES: US3 Testing - Load HPO/OMIM relationships
+1) New check for duplicate lines in input
+
 TAG: omim_hpoload-6-0-5-2
 DATE: 03/31/2016
 STAFF: sc

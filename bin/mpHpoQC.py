@@ -115,6 +115,10 @@ invalidHpoTermList = []
 # all passing QC (non-fatal, non-skip)
 linesToLoadList = []
 
+# used to determine duplicated lines in the input file
+#{line:[line numbers], ...}
+linesLookedAtDict = {}
+
 # Counts reported when no fatal errors
 loadCt = 0
 skipCt = 0
@@ -234,6 +238,7 @@ def openFiles ():
 def runQcChecks ():
 
     global hasQcErrors, hasFatalErrors, loadCt, skipCt
+    global linesLookedAtDict
 
     lineNum = 1 # count header
 
@@ -242,6 +247,15 @@ def runQcChecks ():
     for line in fpInfile.readlines():
 	lineNum += 1
 	line = line[:-1]
+	print line
+	if linesLookedAtDict.has_key(line):
+	    print 'dup line'
+	    linesLookedAtDict[line].append(str(lineNum))
+	    hasFatalErrors = 1
+	    continue
+	else:
+	    print 'new line' 
+	    linesLookedAtDict[line]= [str(lineNum)]
 	tokens = string.split(line, TAB)
 	#print 'count tokens: %s' % len(tokens)
 	#print tokens
@@ -358,7 +372,16 @@ def runQcChecks ():
             for line in invalidHpoTermList:
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
-
+	for line in linesLookedAtDict:
+	    headerWritten = 0
+	    if len(linesLookedAtDict[line]) > 1:
+		if not headerWritten:
+		    fpQcRpt.write('\nDuplicate lines in the input file:\n')
+		    fpQcRpt.write('-----------------------------\n')
+		    headerWritten = 1
+		lineNumString = string.join(linesLookedAtDict[line], ', ')
+		fpQcRpt.write('Lines:%s%s%s' % (lineNumString, TAB, line))
+		fpQcRpt.write('\n')
 	closeFiles()
         sys.exit(3)
     #
