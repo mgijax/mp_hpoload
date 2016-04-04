@@ -247,9 +247,12 @@ def runQcChecks ():
     header = fpInfile.readline()
     for line in fpInfile.readlines():
 	lineNum += 1
-	# don't do this because final line may not have line breadk
-	#line = line[:-1]
+	# don't strip the line or missing header term QC won't work; its the first column
 	#print line
+	#line = string.strip(line)
+	
+	# for reporting only
+	lineStripped = string.strip(line)
 	if linesLookedAtDict.has_key(line):
 	    #print 'dup line'
 	    linesLookedAtDict[line].append(str(lineNum))
@@ -272,45 +275,45 @@ def runQcChecks ():
 	    #if string.find(tokens[0], 'MP:') >= 0: 
 	    #print 'missing columns line: %s' % lineNum
 	    hasFatalErrors = 1
-	    missingColumnsList.append('Line %s: %s%s' % (lineNum, line, CRT))
+	    missingColumnsList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
 	    continue
 	if tokens[0] == '':
 	    #print 'missing MP ID: %s' % lineNum
 	    hasQcErrors = 1
-	    missingMpIdList.append('Line %s: %s%s' % (lineNum, line, CRT))
+	    missingMpIdList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
 	    continue
 
 	mpId = string.strip(tokens[0])
 	mpTerm = string.strip(tokens[1])
 	hpoId = string.strip(tokens[2])
 	# strip this token, there may or may not be a line break
-	hpoTerm = string.strip(string.strip(tokens[3]))
+	hpoTerm = string.strip(tokens[3])
 	#print string.lower(mpId)
 	#print string.lower(mpTerm)
 	#print string.lower(hpoId)
 	#print string.lower(hpoTerm)
 	if mpId == '' or mpTerm == '' or hpoId == '' or hpoTerm == '':
-	    missingDataList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
+	    missingDataList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
 	    #print 'hasFatalErrors missing data'
 	    hasFatalErrors = 1
 	    continue
 	hasIdErrors = 0
 	if not mpHeaderLookup.has_key(string.lower(mpId)):
-	    invalidMpHeaderList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
+	    invalidMpHeaderList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
 	    hasIdErrors = 1
 	else:
 	    if not mpHeaderLookup[string.lower(mpId)] == string.lower(mpTerm):
-		invalidMpTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, line, mpHeaderLookup[string.lower(mpId)], CRT))
+		invalidMpTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, mpHeaderLookup[string.lower(mpId)], CRT))
 		hasIdErrors = 1
 	if not hpoLookup.has_key(string.lower(hpoId)):
-	    invalidHpoList.append('Line %s: "%s"%s' % (lineNum, line, CRT))
+	    invalidHpoList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
             hasIdErrors = 1
 	else:
 	    #print hpoLookup[string.lower(hpoId)]
 	    #print 'should match:'
 	    #print string.lower(hpoTerm)
 	    if not hpoLookup[string.lower(hpoId)] == string.lower(hpoTerm):
-		invalidHpoTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, line, hpoLookup[string.lower(hpoId)], CRT))
+		invalidHpoTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, hpoLookup[string.lower(hpoId)], CRT))
 		hasIdErrors = 1
 
 	if hasIdErrors:
