@@ -183,7 +183,8 @@ def init ():
 	where t._Vocab_key = 106
 	and t._Term_key = a._Object_key
 	and a._MGIType_key = 13
-        and a._LogicalDB_key = 180''', 'auto')
+        and a._LogicalDB_key = 180
+	and a.preferred = 1''', 'auto')
 
     for r in results:
 	hpoId = string.lower(r['accid'])
@@ -246,7 +247,8 @@ def runQcChecks ():
     header = fpInfile.readline()
     for line in fpInfile.readlines():
 	lineNum += 1
-	line = line[:-1]
+	# don't do this because final line may not have line breadk
+	#line = line[:-1]
 	#print line
 	if linesLookedAtDict.has_key(line):
 	    #print 'dup line'
@@ -281,7 +283,8 @@ def runQcChecks ():
 	mpId = string.strip(tokens[0])
 	mpTerm = string.strip(tokens[1])
 	hpoId = string.strip(tokens[2])
-	hpoTerm = string.strip(tokens[3])
+	# strip this token, there may or may not be a line break
+	hpoTerm = string.strip(string.strip(tokens[3]))
 	#print string.lower(mpId)
 	#print string.lower(mpTerm)
 	#print string.lower(hpoId)
