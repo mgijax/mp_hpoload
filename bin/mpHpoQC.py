@@ -247,14 +247,14 @@ def runQcChecks ():
     for line in fpInfile.readlines():
 	lineNum += 1
 	line = line[:-1]
-	print line
+	#print line
 	if linesLookedAtDict.has_key(line):
-	    print 'dup line'
+	    #print 'dup line'
 	    linesLookedAtDict[line].append(str(lineNum))
 	    hasFatalErrors = 1
 	    continue
 	else:
-	    print 'new line' 
+	    #print 'new line' 
 	    linesLookedAtDict[line]= [str(lineNum)]
 	tokens = string.split(line, TAB)
 	#print 'count tokens: %s' % len(tokens)
