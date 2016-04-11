@@ -95,10 +95,10 @@ export JOBSTREAM
 ###########################################################################
 
 #  The name of the load for the subject of an email notification
-MAIL_LOADNAME="mp/HPO annotation load"
+MAIL_LOADNAME="MP/HPO relationship load"
 
 #  Recipient list for mailing the log files (comma-separated)
-MAIL_LOG_PROC="sc"
+MAIL_LOG_PROC="mgiadmin"
 
 export MAIL_LOADNAME MAIL_LOG_PROC
 
