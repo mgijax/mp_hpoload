@@ -396,7 +396,7 @@ def runQcChecks ():
     if hasQcErrors:
 	fpQcRpt.write('\nThe following errors are non-fatal. These records will be skipped.\n\n')
 	if len(missingMpIdList):
-	    fpQcRpt.write('\nInput lines with missing MP header terms:\n')
+	    fpQcRpt.write('\nInput lines with missing MP header ID:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in missingMpIdList:
                 fpQcRpt.write(line)
