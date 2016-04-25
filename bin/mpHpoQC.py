@@ -323,7 +323,7 @@ def runQcChecks ():
 	    continue
 	# If we get here, we have a good record, write it out to the load file
 	loadCt +=1
-	fpToLoadFile.write('%s%s' % (line, CRT))
+	fpToLoadFile.write('%s%s' % (string.strip(line), CRT))
 
     #
     # Report any fatal errors and exit - if found in published file, the load 
