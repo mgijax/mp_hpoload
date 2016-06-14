@@ -52,9 +52,9 @@ INPUT_FILE_TOLOAD=${INPUTDIR}/mp_hpo_toload.txt
 QC_RPT=${RPTDIR}/mp_hpo_qc.rpt
 RELATIONSHIP_BCP=MGI_Relationship.bcp
 QC_LOGFILE=${LOGDIR}/mp_hpo_qc.log
-
+LOAD_QC_SH=${MPHPOLOAD}/bin/mpHpoQC.sh
 export INPUT_FILE_DEFAULT INPUT_FILE_TOLOAD QC_RPT RELATIONSHIP_BCP
-export QC_LOGFILE
+export QC_LOGFILE LOAD_QC_SH
 
 #  Complete path name of the log files
 LOG_FILE=${LOGDIR}/mp_hpoload.log
