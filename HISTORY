@@ -1,10 +1,11 @@
-TAG: omim_hpoload-6-0-5-3
-DATE: ????
+TAG: mp_hpoload-6-0-5-3
+DATE: 06/14/2016
 STAFF: sc
 CHANGES: US3 Testing - Load HPO/OMIM relationships
 1) New check for duplicate lines in input
 2) fix for no newline at end of file - requires a stripped version of the line for reporting.
 3) add exclusion of 2ndary ids to hpoTerm Lookup so they are reported
+4) added *QC_SH config variable so install can chmod
 
 TAG: omim_hpoload-6-0-5-2
 DATE: 03/31/2016
