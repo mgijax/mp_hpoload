@@ -157,8 +157,7 @@ cp -p ${INPUT_FILE_DEFAULT} ${ARCHIVEDIR}/${ARC_FILE}
 #
 if [ ${STAT} = 0 ]
 then
-    #touch ${LASTRUN_FILE}
-    echo 'not touching last run'
+    touch ${LASTRUN_FILE}
 fi
 
 
