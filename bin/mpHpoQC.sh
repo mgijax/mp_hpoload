@@ -135,7 +135,8 @@ rm -f ${QC_RPT}; >${QC_RPT}
 echo "" >> ${LOG}
 date >> ${LOG}
 echo "Run QC checks on the input file" >> ${LOG}
-${LOAD_QC} ${INPUT_FILE}
+echo '${PYTHON} ${LOAD_QC} ${INPUT_FILE}'
+${PYTHON} ${LOAD_QC} ${INPUT_FILE}
 STAT=$?
 if [ ${STAT} -eq 0 ]
 then

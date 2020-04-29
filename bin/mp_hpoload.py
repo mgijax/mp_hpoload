@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 #
 #  mp_hpoload.py
 ###########################################################################
@@ -63,7 +62,6 @@
 
 import sys
 import os
-import string
 
 import db
 import mgi_utils
@@ -130,7 +128,7 @@ def checkArgs ():
     # Throws: Nothing
 
     if len(sys.argv) != 1:
-        print USAGE
+        print(USAGE)
         sys.exit(1)
     return
 
@@ -164,11 +162,11 @@ def init():
     # get next MGI_Relationship key
     #
     results = db.sql('''select max(_Relationship_key) + 1 as nextKey
-	    from MGI_Relationship''', 'auto')
+            from MGI_Relationship''', 'auto')
     if results[0]['nextKey'] is None:
-	nextRelationshipKey = 1000
+        nextRelationshipKey = 1000
     else:
-	nextRelationshipKey = results[0]['nextKey']
+        nextRelationshipKey = results[0]['nextKey']
 
     #
     # create lookups
@@ -186,7 +184,7 @@ def init():
         and a.preferred = 1''', 'auto')
 
     for r in results:
-        mpId = string.lower(r['accid'])
+        mpId = str.lower(r['accid'])
         termKey = r['_Term_key']
         mpHeaderLookup[mpId] = termKey
 
@@ -199,7 +197,7 @@ def init():
         and a._LogicalDB_key = 180''', 'auto')
 
     for r in results:
-        hpoId = string.lower(r['accid'])
+        hpoId = str.lower(r['accid'])
         termKey = r['_Term_key']
         hpoLookup[hpoId] = termKey
 
@@ -219,13 +217,13 @@ def openFiles ():
     try:
         fpInFile = open(inFile, 'r')
     except:
-        print 'Cannot open Feature relationships input file: %s' % inFile
+        print('Cannot open Feature relationships input file: %s' % inFile)
         sys.exit(1)
 
     try:
         fpRelationshipFile = open(relationshipFile, 'w')
     except:
-        print 'Cannot open Feature relationships bcp file: %s' % relationshipFile
+        print('Cannot open Feature relationships bcp file: %s' % relationshipFile)
         sys.exit(1)
 
     return
@@ -263,17 +261,17 @@ def createFiles( ):
     # Iterate through the load ready input file
     #
     for line in fpInFile.readlines():
-	tokens = map(string.strip, string.split(line, TAB))
-        mpId = string.lower(string.strip(tokens[0]))
-	objKey1 = mpHeaderLookup[mpId]
-        hpoId = string.lower(string.strip(tokens[2]))
-	objKey2 = hpoLookup[hpoId]
+        tokens = list(map(str.strip, str.split(line, TAB)))
+        mpId = str.lower(str.strip(tokens[0]))
+        objKey1 = mpHeaderLookup[mpId]
+        hpoId = str.lower(str.strip(tokens[2]))
+        objKey2 = hpoLookup[hpoId]
 
-	# MGI_Relationship
-	fpRelationshipFile.write('%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s' % \
-	    (nextRelationshipKey, TAB, catKey, TAB, objKey1, TAB, objKey2, TAB, relKey, TAB, qualKey, TAB, evidKey, TAB, refsKey, TAB, userKey, TAB, userKey, TAB, DATE, TAB, DATE, CRT))
+        # MGI_Relationship
+        fpRelationshipFile.write('%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s' % \
+            (nextRelationshipKey, TAB, catKey, TAB, objKey1, TAB, objKey2, TAB, relKey, TAB, qualKey, TAB, evidKey, TAB, refsKey, TAB, userKey, TAB, userKey, TAB, DATE, TAB, DATE, CRT))
 
-	nextRelationshipKey += 1
+        nextRelationshipKey += 1
     
     return
 
@@ -291,7 +289,7 @@ def doDeletes():
 def doBcp():
     bcpCmd = '%s %s %s %s %s %s "\\t" "\\n" mgd' % (bcpin, server, database, table, outputDir, bcpFile)
     rc = os.system(bcpCmd)
-    if rc <> 0:
+    if rc != 0:
         closeFiles()
         sys.exit(2)
     return

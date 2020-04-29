@@ -138,7 +138,7 @@ fi
 echo "" >> ${LOG_DIAG}
 date >> ${LOG_DIAG}
 echo "Run mp_hpoload.py"  | tee -a ${LOG_DIAG}
-${MPHPOLOAD}/bin/mp_hpoload.py  
+${PYTHON} ${MPHPOLOAD}/bin/mp_hpoload.py  
 STAT=$?
 checkStatus ${STAT} "${MPHPOLOAD}/bin/mp_hpoload.py"
 

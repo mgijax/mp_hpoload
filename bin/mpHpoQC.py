@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 #
 #  mpHpoQC.py
 ###########################################################################
@@ -59,7 +58,6 @@
 
 import sys
 import os
-import string
 import re
 import mgi_utils
 import db
@@ -138,7 +136,7 @@ def checkArgs ():
     global inputFile
 
     if len(sys.argv) != 2:
-        print USAGE
+        print(USAGE)
         sys.exit(1)
 
     inputFile = sys.argv[1]
@@ -162,34 +160,34 @@ def init ():
     # load lookups 
     # lookup of MP header terms
     results = db.sql('''select a.accid, t.term
-	from DAG_Node n, VOC_Term t, ACC_Accession a
-	where n._Label_key = 3
-	and n._Object_key = t._Term_key
-	and t._Vocab_key = 5
-	and t.isObsolete = 0
-	and t._Term_key = a._Object_key
-	and a._MGIType_key = 13
-	and a._LogicalDB_key = 34
-	and a.preferred = 1''', 'auto')
+        from DAG_Node n, VOC_Term t, ACC_Accession a
+        where n._Label_key = 3
+        and n._Object_key = t._Term_key
+        and t._Vocab_key = 5
+        and t.isObsolete = 0
+        and t._Term_key = a._Object_key
+        and a._MGIType_key = 13
+        and a._LogicalDB_key = 34
+        and a.preferred = 1''', 'auto')
  
     for r in results:
-        mpId = string.lower(r['accid'])
-	term = string.lower(r['term'])
-	mpHeaderLookup[mpId] = term
+        mpId = str.lower(r['accid'])
+        term = str.lower(r['term'])
+        mpHeaderLookup[mpId] = term
 
     # load lookup of HPO terms
     results = db.sql('''select a.accid, t.term 
-	from VOC_Term t, ACC_Accession a
-	where t._Vocab_key = 106
-	and t._Term_key = a._Object_key
-	and a._MGIType_key = 13
+        from VOC_Term t, ACC_Accession a
+        where t._Vocab_key = 106
+        and t._Term_key = a._Object_key
+        and a._MGIType_key = 13
         and a._LogicalDB_key = 180
-	and a.preferred = 1''', 'auto')
+        and a.preferred = 1''', 'auto')
 
     for r in results:
-	hpoId = string.lower(r['accid'])
-        term = string.lower(r['term'])
-	hpoLookup[hpoId] = term
+        hpoId = str.lower(r['accid'])
+        term = str.lower(r['term'])
+        hpoLookup[hpoId] = term
 
     return
 
@@ -208,21 +206,21 @@ def openFiles ():
     try:
         fpInfile = open(inputFile, 'r')
     except:
-        print 'Cannot open input file: %s' % inputFile
+        print('Cannot open input file: %s' % inputFile)
         sys.exit(1)
     
     # all lines that pass QC
     try:
         fpToLoadFile = open(inputFileToLoad, 'w')
     except:
-        print 'Cannot open input file: %s' % inputFileToLoad
+        print('Cannot open input file: %s' % inputFileToLoad)
         sys.exit(1)
 
     # QC report file
     try:
         fpQcRpt = open(qcRptFile, 'w')
     except:
-        print 'Cannot open report file: %s' % qcRptFile
+        print('Cannot open report file: %s' % qcRptFile)
         sys.exit(1)
 
     return
@@ -246,84 +244,84 @@ def runQcChecks ():
     # throw away header
     header = fpInfile.readline()
     for line in fpInfile.readlines():
-	lineNum += 1
-	# don't strip the line or missing header term QC won't work; its the first column
-	#print line
-	#line = string.strip(line)
-	
-	# for reporting only
-	lineStripped = string.strip(line)
-	if linesLookedAtDict.has_key(line):
-	    #print 'dup line'
-	    linesLookedAtDict[line].append(str(lineNum))
-	    hasFatalErrors = 1
-	    continue
-	else:
-	    #print 'new line' 
-	    linesLookedAtDict[line]= [str(lineNum)]
-	tokens = string.split(line, TAB)
-	#print 'count tokens: %s' % len(tokens)
-	#print tokens
-	#print '\n'
-	#print 'lineNum: %s tokens: %s' % (lineNum, tokens)
-	# skip blank lines
-	if  len(tokens) == 1 and tokens[0] == '':
-	    skipCt += 1
-	    continue
-	if len(tokens) < 4:
-	    # if the first token is an MP ID, then we are missing columns
-	    #if string.find(tokens[0], 'MP:') >= 0: 
-	    #print 'missing columns line: %s' % lineNum
-	    hasFatalErrors = 1
-	    missingColumnsList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
-	    continue
-	if tokens[0] == '':
-	    #print 'missing MP ID: %s' % lineNum
-	    hasQcErrors = 1
-	    missingMpIdList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
-	    continue
+        lineNum += 1
+        # don't strip the line or missing header term QC won't work; its the first column
+        #print line
+        #line = str.strip(line)
+        
+        # for reporting only
+        lineStripped = str.strip(line)
+        if line in linesLookedAtDict:
+            #print 'dup line'
+            linesLookedAtDict[line].append(str(lineNum))
+            hasFatalErrors = 1
+            continue
+        else:
+            #print 'new line' 
+            linesLookedAtDict[line]= [str(lineNum)]
+        tokens = str.split(line, TAB)
+        #print 'count tokens: %s' % len(tokens)
+        #print tokens
+        #print '\n'
+        #print 'lineNum: %s tokens: %s' % (lineNum, tokens)
+        # skip blank lines
+        if  len(tokens) == 1 and tokens[0] == '':
+            skipCt += 1
+            continue
+        if len(tokens) < 4:
+            # if the first token is an MP ID, then we are missing columns
+            #if str.find(tokens[0], 'MP:') >= 0: 
+            #print 'missing columns line: %s' % lineNum
+            hasFatalErrors = 1
+            missingColumnsList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
+            continue
+        if tokens[0] == '':
+            #print 'missing MP ID: %s' % lineNum
+            hasQcErrors = 1
+            missingMpIdList.append('Line %s: %s%s' % (lineNum, lineStripped, CRT))
+            continue
 
-	mpId = string.strip(tokens[0])
-	mpTerm = string.strip(tokens[1])
-	hpoId = string.strip(tokens[2])
-	# strip this token, there may or may not be a line break
-	hpoTerm = string.strip(tokens[3])
-	#print string.lower(mpId)
-	#print string.lower(mpTerm)
-	#print string.lower(hpoId)
-	#print string.lower(hpoTerm)
-	if mpId == '' or mpTerm == '' or hpoId == '' or hpoTerm == '':
-	    missingDataList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
-	    #print 'hasFatalErrors missing data'
-	    hasFatalErrors = 1
-	    continue
-	hasIdErrors = 0
-	if not mpHeaderLookup.has_key(string.lower(mpId)):
-	    invalidMpHeaderList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
-	    hasIdErrors = 1
-	else:
-	    if not mpHeaderLookup[string.lower(mpId)] == string.lower(mpTerm):
-		invalidMpTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, mpHeaderLookup[string.lower(mpId)], CRT))
-		hasIdErrors = 1
-	if not hpoLookup.has_key(string.lower(hpoId)):
-	    invalidHpoList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
+        mpId = str.strip(tokens[0])
+        mpTerm = str.strip(tokens[1])
+        hpoId = str.strip(tokens[2])
+        # strip this token, there may or may not be a line break
+        hpoTerm = str.strip(tokens[3])
+        #print(str.lower(mpId))
+        #print(str.lower(mpTerm))
+        #print(str.lower(hpoId))
+        #print(str.lower(hpoTerm))
+        if mpId == '' or mpTerm == '' or hpoId == '' or hpoTerm == '':
+            missingDataList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
+            #print 'hasFatalErrors missing data'
+            hasFatalErrors = 1
+            continue
+        hasIdErrors = 0
+        if str.lower(mpId) not in mpHeaderLookup:
+            invalidMpHeaderList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
             hasIdErrors = 1
-	else:
-	    #print hpoLookup[string.lower(hpoId)]
-	    #print 'should match:'
-	    #print string.lower(hpoTerm)
-	    if not hpoLookup[string.lower(hpoId)] == string.lower(hpoTerm):
-		invalidHpoTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, hpoLookup[string.lower(hpoId)], CRT))
-		hasIdErrors = 1
+        else:
+            if not mpHeaderLookup[str.lower(mpId)] == str.lower(mpTerm):
+                invalidMpTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, mpHeaderLookup[str.lower(mpId)], CRT))
+                hasIdErrors = 1
+        if str.lower(hpoId) not in hpoLookup:
+            invalidHpoList.append('Line %s: "%s"%s' % (lineNum, lineStripped, CRT))
+            hasIdErrors = 1
+        else:
+            #print(hpoLookup[str.lower(hpoId)])
+            #print('should match:')
+            #print(str.lower(hpoTerm))
+            if not hpoLookup[str.lower(hpoId)] == str.lower(hpoTerm):
+                invalidHpoTermList.append('Line %s: "%s"  In database: %s%s' % (lineNum, lineStripped, hpoLookup[str.lower(hpoId)], CRT))
+                hasIdErrors = 1
 
-	if hasIdErrors:
-	    #print 'print hasFatalErrors hasIdErrors'
-	    hasFatalErrors = 1
-	    skipCt += 1
-	    continue
-	# If we get here, we have a good record, write it out to the load file
-	loadCt +=1
-	fpToLoadFile.write('%s%s' % (string.strip(line), CRT))
+        if hasIdErrors:
+            #print 'print hasFatalErrors hasIdErrors'
+            hasFatalErrors = 1
+            skipCt += 1
+            continue
+        # If we get here, we have a good record, write it out to the load file
+        loadCt +=1
+        fpToLoadFile.write('%s%s' % (str.strip(line), CRT))
 
     #
     # Report any fatal errors and exit - if found in published file, the load 
@@ -331,25 +329,25 @@ def runQcChecks ():
     #
 
     if lineNum < minLines:
-	fpQcRpt.write('\nInput file has < %s lines indicating an incomplete file. Total input lines: %s.\n No other QC checking will be done until this is fixed.\n' % (minLines, lineNum))
-	closeFiles()
-	sys.exit(3)
+        fpQcRpt.write('\nInput file has < %s lines indicating an incomplete file. Total input lines: %s.\n No other QC checking will be done until this is fixed.\n' % (minLines, lineNum))
+        closeFiles()
+        sys.exit(3)
     if hasFatalErrors:
-	fpQcRpt.write('\nThe following errors must be fixed before publishing; if present, the load will not run\n\n')
-	    
-	if len(missingColumnsList):
-	    fpQcRpt.write('\nInput lines with missing columns:\n')
-	    fpQcRpt.write('-----------------------------\n')
-	    for line in missingColumnsList:
-		fpQcRpt.write(line)
-	    fpQcRpt.write('\n')
+        fpQcRpt.write('\nThe following errors must be fixed before publishing; if present, the load will not run\n\n')
+            
+        if len(missingColumnsList):
+            fpQcRpt.write('\nInput lines with missing columns:\n')
+            fpQcRpt.write('-----------------------------\n')
+            for line in missingColumnsList:
+                fpQcRpt.write(line)
+            fpQcRpt.write('\n')
 
-	if len(missingDataList):
-	    fpQcRpt.write('\nInput lines with missing data:\n')
-	    fpQcRpt.write('-----------------------------\n')
-	    for line in missingDataList:
-		fpQcRpt.write(line)
-	    fpQcRpt.write('\n')
+        if len(missingDataList):
+            fpQcRpt.write('\nInput lines with missing data:\n')
+            fpQcRpt.write('-----------------------------\n')
+            for line in missingDataList:
+                fpQcRpt.write(line)
+            fpQcRpt.write('\n')
 
         if len(invalidMpHeaderList):
             fpQcRpt.write('\nInput lines with invalid MP header IDs:\n')
@@ -358,8 +356,8 @@ def runQcChecks ():
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
 
-	if len(invalidMpTermList):
-	    fpQcRpt.write('\nInput lines where MP term does not match term in the database:\n')
+        if len(invalidMpTermList):
+            fpQcRpt.write('\nInput lines where MP term does not match term in the database:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in invalidMpTermList:
                 fpQcRpt.write(line)
@@ -372,46 +370,46 @@ def runQcChecks ():
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
 
-	if len(invalidHpoTermList):
+        if len(invalidHpoTermList):
             fpQcRpt.write('\nInput lines where HPO term does not match term in the database:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in invalidHpoTermList:
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
-	for line in linesLookedAtDict:
-	    headerWritten = 0
-	    if len(linesLookedAtDict[line]) > 1:
-		if not headerWritten:
-		    fpQcRpt.write('\nDuplicate lines in the input file:\n')
-		    fpQcRpt.write('-----------------------------\n')
-		    headerWritten = 1
-		lineNumString = string.join(linesLookedAtDict[line], ', ')
-		fpQcRpt.write('Lines:%s%s%s' % (lineNumString, TAB, line))
-		fpQcRpt.write('\n')
-	closeFiles()
+        for line in linesLookedAtDict:
+            headerWritten = 0
+            if len(linesLookedAtDict[line]) > 1:
+                if not headerWritten:
+                    fpQcRpt.write('\nDuplicate lines in the input file:\n')
+                    fpQcRpt.write('-----------------------------\n')
+                    headerWritten = 1
+                lineNumString = str.join(', ', linesLookedAtDict[line])
+                fpQcRpt.write('Lines:%s%s%s' % (lineNumString, TAB, line))
+                fpQcRpt.write('\n')
+        closeFiles()
         sys.exit(3)
     #
     # Report any non-fatal errors
     #
     if hasQcErrors:
-	fpQcRpt.write('\nThe following errors are non-fatal. These records will be skipped.\n\n')
-	if len(missingMpIdList):
-	    fpQcRpt.write('\nInput lines with missing MP header ID:\n')
+        fpQcRpt.write('\nThe following errors are non-fatal. These records will be skipped.\n\n')
+        if len(missingMpIdList):
+            fpQcRpt.write('\nInput lines with missing MP header ID:\n')
             fpQcRpt.write('-----------------------------\n')
             for line in missingMpIdList:
                 fpQcRpt.write(line)
             fpQcRpt.write('\n')
 
-    print '%sNumber with non-fatal QC errors, these will not be processed: %s' % (CRT, skipCt)
+    print('%sNumber with non-fatal QC errors, these will not be processed: %s' % (CRT, skipCt))
     
-    print 'Total number that will be loaded: %s%s' % ( loadCt, CRT)
-	#closeFiles()
-	#sys.exit(2)
+    print('Total number that will be loaded: %s%s' % ( loadCt, CRT))
+        #closeFiles()
+        #sys.exit(2)
 
     return
 
 # end runQcChecks() -------------------------------------
-	
+        
 #
 # Purpose: Close the files.
 # Returns: Nothing
