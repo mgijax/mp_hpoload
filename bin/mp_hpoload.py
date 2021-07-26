@@ -161,8 +161,7 @@ def init():
     #
     # get next MGI_Relationship key
     #
-    results = db.sql('''select max(_Relationship_key) + 1 as nextKey
-            from MGI_Relationship''', 'auto')
+    results = db.sql('''select nextval('mgi_relationship_seq') as nextKey''', 'auto')
     if results[0]['nextKey'] is None:
         nextRelationshipKey = 1000
     else:
@@ -289,6 +288,11 @@ def doDeletes():
 def doBcp():
     bcpCmd = '%s %s %s %s %s %s "\\t" "\\n" mgd' % (bcpin, server, database, table, outputDir, bcpFile)
     rc = os.system(bcpCmd)
+
+    # update mgi_relationship_seq auto-sequence
+    db.sql(''' select setval('mgi_relationship_seq', (select max(_Relationship_key) from MGI_Relationship)) ''', None)
+    db.commit()
+
     if rc != 0:
         closeFiles()
         sys.exit(2)
